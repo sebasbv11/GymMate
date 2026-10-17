@@ -168,7 +168,7 @@
 | Integrante | Estado inicial | Rama integrada | Verificación |
 |---|---|---|---|
 | Jordy Sebastián Bravo Véliz | En progreso | No | Compilación correcta; revisión visual pendiente |
-| Sebastian Esteban Álvarez De La Rosa | Pendiente | No | Pendiente |
+| Sebastian Esteban Álvarez De La Rosa | Implementado; pendiente integración | No | assembleDebug y pruebas unitarias correctos; Preview revisada en dos tamaños; interacción en dispositivo pendiente |
 | Joel Alejandro Barrera Vaca | Pendiente | No | Pendiente |
 | José Luis Sarabia Calderón | Pendiente | No | Pendiente |
 | Jandry Paul Sánchez Murillo | Pendiente | No | Pendiente |
@@ -180,6 +180,7 @@ Cada integrante registrará aquí, de forma breve, la tarea apoyada por IA y la 
 | Fecha | Integrante | Herramienta | Tarea apoyada | Revisión humana |
 |---|---|---|---|---|
 | 17/10/2026 | Jordy Sebastián Bravo Véliz | Codex | Documentación del equipo, identidad visual, tema, navegación y pantallas de acceso | Pendiente de revisión visual por Jordy |
+| 17/10/2026 | Sebastian Esteban Álvarez De La Rosa | Codex | Inicio, catálogo, detalle, componentes, pruebas y skills por integrante | Pendiente de revisión humana por Sebastian y Jordy |
 
 ## Lista general de verificación
 
