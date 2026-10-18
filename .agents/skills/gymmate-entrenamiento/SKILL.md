@@ -16,3 +16,7 @@ Implementar en ui/screens/workout. Coordinar contrato de rutina con Joel. Manten
 Usar Kotlin, Compose y Material 3 con el tema existente, datos locales y textos en español. Las pantallas reciben lambdas y no NavController. Agregar previews, desplazamiento y estados básicos. No agregar servicios, ViewModels ni dependencias innecesarias.
 
 Ejecutar :app:assembleDebug y las pruebas del módulo. Revisar visualmente y probar callbacks en un dispositivo o Preview; registrar cualquier verificación pendiente. Informar archivos y contrato para Jordy. Commit, push, merge y cambios de rama requieren autorización expresa actual; nunca reutilizar la autorización de una entrega pasada.
+
+## Integración vigente
+
+WorkoutScreen recibe `routine: Routine` del módulo compartido. Deriva ejercicios, series y repeticiones de esa rutina; no volver a fijar nueve series ni doce repeticiones. AppNavigation conserva la entrada durante descanso, retira entrenamiento al mostrar resumen y crea una sesión nueva al repetir. El resumen recibe `routineName` y los resultados reales del flujo local. Probar también Día de piernas (4 series, 60 repeticiones).

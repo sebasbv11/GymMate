@@ -170,7 +170,7 @@
 | Jordy Sebastián Bravo Véliz | En progreso | No | Compilación correcta; revisión visual pendiente |
 | Sebastian Esteban Álvarez De La Rosa | Implementado; código integrado en main | Sí | assembleDebug y pruebas unitarias correctos; conexión de navegación central pendiente |
 | Joel Alejandro Barrera Vaca | Implementado; código integrado en main | Sí | assembleDebug y pruebas unitarias; Preview revisada a dos tamaños; interacción pendiente |
-| José Luis Sarabia Calderón | Pendiente | No | Pendiente |
+| José Luis Sarabia Calderón | Implementado e integrado con las rutinas seleccionadas | Sí | assembleDebug y pruebas unitarias correctos; instrumentación compilada, ejecución y revisión visual pendientes |
 | Jandry Paul Sánchez Murillo | Pendiente | No | Pendiente |
 
 ## Registro de asistencia de IA
@@ -200,3 +200,5 @@ Cada integrante registrará aquí, de forma breve, la tarea apoyada por IA y la 
 - [ ] El Word contiene la primera y segunda etapa.
 - [ ] El Word contiene dos o tres capturas del MVP.
 - [ ] Cada integrante realizó su entrega individual.
+
+Integración autorizada de entrenamiento: navegación central conectada con Inicio, Ejercicios y Rutinas. Skills de entrenamiento, descanso y resumen disponibles. Prueba física del flujo integrado pendiente por ausencia de dispositivo y AVD.
