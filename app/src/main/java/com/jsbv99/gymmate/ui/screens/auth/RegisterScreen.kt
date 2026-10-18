@@ -36,7 +36,7 @@ import com.jsbv99.gymmate.ui.theme.GymMateTheme
 @Composable
 fun RegisterScreen(
     onBack: () -> Unit,
-    onRegisterSuccess: () -> Unit,
+    onRegisterSuccess: (String) -> Unit,
     onLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -132,7 +132,7 @@ fun RegisterScreen(
                 onClick = {
                     attempted = true
                     if (nameValid && emailValid && passwordValid && confirmationValid) {
-                        onRegisterSuccess()
+                        onRegisterSuccess(name.trim())
                     }
                 },
                 modifier = Modifier

@@ -4,8 +4,19 @@ import com.jsbv99.gymmate.data.RoutineSamples
 import com.jsbv99.gymmate.ui.screens.exercises.exerciseSamples
 import org.junit.Assert.*
 import org.junit.Test
+import java.io.*
 
 class RoutineTest {
+    @Test fun sessionRoutinesCanBeSerializedAndRestored() {
+        val routines = arrayListOf(Routine("custom", "Rutina editada",
+            listOf(RoutineExercise(RoutineSamples.exercises.first(), 2, 8))))
+        val bytes = ByteArrayOutputStream().also { output ->
+            ObjectOutputStream(output).use { it.writeObject(routines) }
+        }.toByteArray()
+        val restored = ObjectInputStream(ByteArrayInputStream(bytes)).use { it.readObject() }
+        assertEquals(routines, restored)
+    }
+
     @Test fun routineExercisesMatchTheIntegratedCatalog() {
         RoutineSamples.exercises.forEach { exercise ->
             val integrated = exerciseSamples.single { it.id == exercise.id }

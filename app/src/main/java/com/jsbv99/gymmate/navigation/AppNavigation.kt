@@ -14,12 +14,15 @@ import com.jsbv99.gymmate.ui.screens.home.HomeScreen
 import com.jsbv99.gymmate.ui.screens.exercises.*
 import com.jsbv99.gymmate.ui.screens.routines.*
 import com.jsbv99.gymmate.ui.screens.workout.*
+import com.jsbv99.gymmate.ui.screens.progress.*
+import com.jsbv99.gymmate.ui.screens.settings.ConfiguracionScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    // shortcut: routines live in memory for this MVP; add persistence only when scope changes.
-    val routines = remember { mutableStateListOf<Routine>().apply { addAll(RoutineSamples.routines) } }
+    // shortcut: saved session state only; add disk persistence if the MVP scope changes.
+    var routines by rememberSaveable { mutableStateOf(ArrayList(RoutineSamples.routines)) }
+    var userName by rememberSaveable { mutableStateOf("deportista") }
     var workoutId by rememberSaveable { mutableStateOf("") }
     var duration by rememberSaveable { mutableIntStateOf(0) }
     var sets by rememberSaveable { mutableIntStateOf(0) }
@@ -54,7 +57,8 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Routes.Register) {
             RegisterScreen(
                 onBack = { navController.popBackStack() },
-                onRegisterSuccess = {
+                onRegisterSuccess = { name ->
+                    userName = name
                     navController.navigate(Routes.Home) {
                         popUpTo(Routes.Splash) { inclusive = true }
                     }
@@ -68,7 +72,14 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onRoutines = { navController.navigate(Routes.Routines) },
                 onHistory = { navController.navigate(Routes.History) },
                 onProgress = { navController.navigate(Routes.Progress) },
-                onSettings = { navController.navigate(Routes.Settings) }
+                onSettings = { navController.navigate(Routes.Settings) },
+                userName = userName,
+                onSignOut = {
+                    userName = "deportista"
+                    navController.navigate(Routes.Splash) {
+                        popUpTo(Routes.Home) { inclusive = true }
+                    }
+                }
             )
         }
         composable(Routes.Exercises) {
@@ -87,7 +98,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onBack = { navController.popBackStack() },
                 onSaveRoutine = { routine ->
                     val index = routines.indexOfFirst { it.id == routine.id }
-                    if (index < 0) routines.add(routine) else routines[index] = routine
+                    routines = ArrayList(routines).apply {
+                        if (index < 0) add(routine) else set(index, routine)
+                    }
                     navController.popBackStack()
                 },
                 routine = routines.find { it.id == editId }
@@ -128,8 +141,18 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 }, durationSeconds = duration, completedSets = sets, completedReps = reps,
                 routineName = routines.find { it.id == workoutId }?.name ?: "Rutina local")
         }
-        listOf(Routes.History to "Historial", Routes.Progress to "Progreso", Routes.Settings to "Configuración").forEach { (route, title) ->
-            composable(route) { PendingScreen("$title: pendiente de integrar", { navController.popBackStack() }) }
+        composable(Routes.History) {
+            HistorialScreen(onBack = { navController.popBackStack() }, onProgress = {
+                if (!navController.popBackStack(Routes.Progress, false)) navController.navigate(Routes.Progress)
+            })
+        }
+        composable(Routes.Progress) {
+            ProgresoScreen(onBack = { navController.popBackStack() }, onHistory = {
+                if (!navController.popBackStack(Routes.History, false)) navController.navigate(Routes.History)
+            })
+        }
+        composable(Routes.Settings) {
+            ConfiguracionScreen(onBack = { navController.popBackStack() })
         }
     }
 }

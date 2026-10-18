@@ -168,10 +168,10 @@
 | Integrante | Estado inicial | Rama integrada | Verificación |
 |---|---|---|---|
 | Jordy Sebastián Bravo Véliz | En progreso | No | Compilación correcta; revisión visual pendiente |
-| Sebastian Esteban Álvarez De La Rosa | Implementado; código integrado en main | Sí | assembleDebug y pruebas unitarias correctos; conexión de navegación central pendiente |
-| Joel Alejandro Barrera Vaca | Implementado; código integrado en main | Sí | assembleDebug y pruebas unitarias; Preview revisada a dos tamaños; interacción pendiente |
-| José Luis Sarabia Calderón | Implementado e integrado con las rutinas seleccionadas | Sí | assembleDebug y pruebas unitarias correctos; instrumentación compilada, ejecución y revisión visual pendientes |
-| Jandry Paul Sánchez Murillo | Pendiente | No | Pendiente |
+| Sebastian Esteban Álvarez De La Rosa | Implementado; código integrado en main | Sí | assembleDebug y pruebas unitarias correctos; navegación conectada; acceso y catálogo probados en dispositivo |
+| Joel Alejandro Barrera Vaca | Implementado; código integrado en main | Sí | assembleDebug y pruebas unitarias; Preview revisada a dos tamaños; creación, edición y recreación probadas en dispositivo |
+| José Luis Sarabia Calderón | Implementado e integrado con las rutinas seleccionadas | Sí | assembleDebug y pruebas unitarias correctos; instrumentación y flujo integrado probados en dispositivo |
+| Jandry Paul Sánchez Murillo | Implementado y conectado en navegación | Sí | Compilación; Historial, Progreso y Configuración probados en Redmi Note 9 Pro; revisión exhaustiva de tamaños pendiente |
 
 ## Registro de asistencia de IA
 
@@ -201,4 +201,6 @@ Cada integrante registrará aquí, de forma breve, la tarea apoyada por IA y la 
 - [ ] El Word contiene dos o tres capturas del MVP.
 - [ ] Cada integrante realizó su entrega individual.
 
-Integración autorizada de entrenamiento: navegación central conectada con Inicio, Ejercicios y Rutinas. Skills de entrenamiento, descanso y resumen disponibles. Prueba física del flujo integrado pendiente por ausencia de dispositivo y AVD.
+Integración autorizada de entrenamiento: navegación central conectada con Inicio, Ejercicios y Rutinas. Skills de entrenamiento, descanso y resumen disponibles. Prueba física del flujo integrado completada en Redmi Note 9 Pro; consultar docs/CORRECCIONES_REPORTE.md para alcance y resultados.
+
+18/10/2026: correcciones asistidas por Codex autorizadas por Sebastian: fondo de autenticación, contraste de workout, restauración de rutinas, nombre del saludo, cierre de sesión y conexión de los módulos existentes de Jandry. Ocho pruebas unitarias correctas; integración probada en ambos temas. Revisión humana pendiente. Commit y push autorizados por Sebastian con la cuenta SebastianAlvarez-dev.

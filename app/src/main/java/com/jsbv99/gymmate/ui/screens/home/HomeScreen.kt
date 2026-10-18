@@ -15,7 +15,8 @@ import com.jsbv99.gymmate.ui.theme.GymMateTheme
 fun HomeScreen(
     onExercises: () -> Unit, onRoutines: () -> Unit, onHistory: () -> Unit,
     onProgress: () -> Unit, onSettings: () -> Unit, modifier: Modifier = Modifier,
-    userName: String = "Sebastian"
+    userName: String = "deportista",
+    onSignOut: () -> Unit = {}
 ) {
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -33,6 +34,7 @@ fun HomeScreen(
             OutlinedButton(onClick = onHistory, modifier = Modifier.fillMaxWidth()) { Text("Historial de entrenamientos") }
             OutlinedButton(onClick = onProgress, modifier = Modifier.fillMaxWidth()) { Text("Consultar mi progreso") }
             TextButton(onClick = onSettings, modifier = Modifier.fillMaxWidth()) { Text("Configuración") }
+            TextButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) { Text("Cerrar sesión") }
             Text("A tu ritmo", style = MaterialTheme.typography.titleMedium)
             Text("Prioriza la técnica y realiza un calentamiento antes de comenzar.")
         }
