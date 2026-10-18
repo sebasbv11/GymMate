@@ -168,8 +168,8 @@
 | Integrante | Estado inicial | Rama integrada | Verificación |
 |---|---|---|---|
 | Jordy Sebastián Bravo Véliz | En progreso | No | Compilación correcta; revisión visual pendiente |
-| Sebastian Esteban Álvarez De La Rosa | Implementado; pendiente integración | No | assembleDebug y pruebas unitarias correctos; Preview revisada en dos tamaños; interacción en dispositivo pendiente |
-| Joel Alejandro Barrera Vaca | Pendiente | No | Pendiente |
+| Sebastian Esteban Álvarez De La Rosa | Implementado; código integrado en main | Sí | assembleDebug y pruebas unitarias correctos; conexión de navegación central pendiente |
+| Joel Alejandro Barrera Vaca | Implementado; código integrado en main | Sí | assembleDebug y pruebas unitarias; Preview revisada a dos tamaños; interacción pendiente |
 | José Luis Sarabia Calderón | Pendiente | No | Pendiente |
 | Jandry Paul Sánchez Murillo | Pendiente | No | Pendiente |
 
@@ -181,6 +181,7 @@ Cada integrante registrará aquí, de forma breve, la tarea apoyada por IA y la 
 |---|---|---|---|---|
 | 17/10/2026 | Jordy Sebastián Bravo Véliz | Codex | Documentación del equipo, identidad visual, tema, navegación y pantallas de acceso | Pendiente de revisión visual por Jordy |
 | 17/10/2026 | Sebastian Esteban Álvarez De La Rosa | Codex | Inicio, catálogo, detalle, componentes, pruebas y skills por integrante | Pendiente de revisión humana por Sebastian y Jordy |
+| 17/10/2026 | Joel Alejandro Barrera Vaca | Codex | Modelos, datos simulados, lista, editor y detalle de rutinas; pruebas y skills | Pendiente de revisión humana por Joel y Jordy |
 
 ## Lista general de verificación
 
@@ -199,4 +200,3 @@ Cada integrante registrará aquí, de forma breve, la tarea apoyada por IA y la 
 - [ ] El Word contiene la primera y segunda etapa.
 - [ ] El Word contiene dos o tres capturas del MVP.
 - [ ] Cada integrante realizó su entrega individual.
-
