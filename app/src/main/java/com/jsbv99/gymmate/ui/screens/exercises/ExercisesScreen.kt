@@ -12,13 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jsbv99.gymmate.ui.components.*
+import com.jsbv99.gymmate.data.exercises.ExerciseSample
 import com.jsbv99.gymmate.ui.theme.GymMateTheme
 
 @Composable
-fun ExercisesScreen(onBack: () -> Unit, onExerciseClick: (String) -> Unit, modifier: Modifier = Modifier) {
+fun ExercisesScreen(onBack: () -> Unit, onExerciseClick: (String) -> Unit, modifier: Modifier = Modifier, catalog: List<ExerciseSample> = exerciseSamples) {
     var query by rememberSaveable { mutableStateOf("") }
     var muscle by rememberSaveable { mutableStateOf("Todos") }
-    val exercises = filterExercises(query, muscle)
+    val exercises = catalog.filter { (muscle == "Todos" || it.muscle == muscle) && (it.name.contains(query.trim(), true) || it.muscle.contains(query.trim(), true)) }
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         LazyColumn(Modifier.safeDrawingPadding().imePadding(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item { TextButton(onClick = onBack) { Text("← Volver") } }
@@ -28,7 +29,7 @@ fun ExercisesScreen(onBack: () -> Unit, onExerciseClick: (String) -> Unit, modif
             }
             item {
                 Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    (listOf("Todos") + exerciseSamples.map { it.muscle }.distinct()).forEach { group ->
+                    (listOf("Todos") + catalog.map { it.muscle }.distinct()).forEach { group ->
                         FilterChip(selected = muscle == group, onClick = { muscle = group }, label = { Text(group) })
                     }
                 }

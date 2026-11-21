@@ -9,11 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jsbv99.gymmate.ui.components.ScreenHeading
+import com.jsbv99.gymmate.data.exercises.ExerciseSample
 import com.jsbv99.gymmate.ui.theme.GymMateTheme
 
 @Composable
-fun ExerciseDetailScreen(exerciseId: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    val exercise = exerciseSamples.find { it.id == exerciseId }
+fun ExerciseDetailScreen(exerciseId: String, onBack: () -> Unit, modifier: Modifier = Modifier, catalog: List<ExerciseSample> = exerciseSamples) {
+    val exercise = catalog.find { it.id == exerciseId }
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             TextButton(onClick = onBack) { Text("← Volver") }
