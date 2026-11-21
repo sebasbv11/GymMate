@@ -86,7 +86,8 @@ fun RoutineEditorScreen(
     onSaveRoutine: (Routine) -> Unit,
     routine: Routine? = null,
     exercises: List<Exercise> = RoutineSamples.exercises,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    errorMessage: String? = null
 ) {
     val key = routine?.id ?: "new"
     val catalog = (exercises + routine?.exercises.orEmpty().map { it.exercise }).distinctBy { it.id }
@@ -130,6 +131,7 @@ fun RoutineEditorScreen(
             }
         }
         if (attempted && !valid) Text("Escribe un nombre, selecciona ejercicios y revisa las series y repeticiones.", color = MaterialTheme.colorScheme.error)
+        if (errorMessage != null) Text(errorMessage, color = MaterialTheme.colorScheme.error)
         Text("Los cambios se guardan solo durante esta sesión simulada.")
         Button(onClick = {
             attempted = true
