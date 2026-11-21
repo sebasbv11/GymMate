@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -40,7 +42,10 @@ fun LoginScreen(
     onBack: () -> Unit,
     onLoginSuccess: () -> Unit,
     onRegister: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    loading: Boolean = false,
+    error: String? = null,
+    onSubmit: (String, String) -> Unit = { _, _ -> onLoginSuccess() }
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -54,6 +59,7 @@ fun LoginScreen(
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
+            .verticalScroll(rememberScrollState())
             .imePadding()
             .padding(horizontal = 24.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -113,16 +119,18 @@ fun LoginScreen(
                     imeAction = ImeAction.Done
                 )
             )
+            if (error != null) Text(error, color = MaterialTheme.colorScheme.error)
             Button(
+                enabled = !loading,
                 onClick = {
                     attempted = true
-                    if (emailValid && passwordValid) onLoginSuccess()
+                    if (emailValid && passwordValid) onSubmit(email.trim(), password)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text("Entrar")
+                Text(if (loading) "Espera..." else "Entrar")
             }
             OutlinedButton(
                 onClick = onRegister,

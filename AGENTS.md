@@ -24,8 +24,8 @@ Construir el MVP de GymMate como aplicación móvil nativa usando Kotlin, Jetpac
 - Utilizar componentes de Material Design 3.
 - Implementar la navegación con `NavController` y rutas centralizadas.
 - Mantener el paquete `com.jsbv99.gymmate`.
-- Utilizar datos locales simulados en esta etapa.
-- No incorporar base de datos, API, repositorios de datos o ViewModels salvo que el equipo cambie explícitamente el alcance.
+- En la etapa 3, usar repositorios simulados en memoria, ViewModels y flujos reactivos; coordinar los contratos compartidos con el equipo.
+- No incorporar una base de datos, API ni autenticación real sin acordar previamente el cambio de alcance con el equipo.
 - Evitar dependencias que no sean necesarias para el MVP.
 - Mantener textos visibles en español.
 - Respetar la identidad visual y el prototipo de GymMate.

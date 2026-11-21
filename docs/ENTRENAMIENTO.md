@@ -4,7 +4,7 @@ Rama: `feature/entrenamiento`. Módulo: `com.jsbv99.gymmate.ui.screens.workout`.
 
 ## Pantallas y estado
 
-- `WorkoutScreen.kt`: rutina local explícitamente de demostración, con sentadillas, flexiones y abdominales; 3 series de 12 repeticiones por ejercicio. `completedSets`, `startedAt`, `exitDialog` y `finished` usan `rememberSaveable(routineId)`. Se deriva el ejercicio, serie y porcentaje del total completado. Se confirma la salida sin guardar resultados.
+- `WorkoutScreen.kt`: rutina local seleccionada recibida mediante `routine: Routine`, con ejercicios, series y repeticiones del módulo compartido de Joel. `completedSets`, `startedAt`, `exitDialog` y `finished` usan `rememberSaveable(routineId)`. Se deriva el ejercicio, serie y porcentaje del total completado. Se confirma la salida sin guardar resultados.
 - `RestScreen.kt`: 60 segundos por defecto; admite de 1 a 3600 segundos. `remainingMillis` y `leaving` se conservan con `rememberSaveable`. `LaunchedEffect` y `repeatOnLifecycle(RESUMED)` cancelan el trabajo al abandonar la composición y pausan fuera de primer plano. El reloj monotónico evita cambios por ajustes de hora. Omitir deshabilita acciones y detiene el conteo; al llegar a cero se requiere pulsar Finalizar descanso.
 - `WorkoutSummaryScreen.kt`: recibe los resultados de la sesión y presenta duración, series, repeticiones y 150 kcal claramente simuladas. No persiste datos ni modifica historial. Valores predeterminados solo para demostraciones.
 - `WorkoutLayout.kt`: estructura desplazable, márgenes seguros, ancho máximo y formato de duración compartidos dentro del módulo.
@@ -13,11 +13,11 @@ Las tres pantallas incluyen previews a 320×640 y 640×360 con texto ampliado. U
 
 ## Conexión por Jordy Sebastián Bravo Véliz
 
-No se modificaron MainActivity, AppNavigation, Routes, Gradle, manifiesto ni tema. Estas pantallas todavía no son accesibles desde la navegación de la aplicación base.
+Integrado en AppNavigation por autorización del usuario con la cuenta SebastianAlvarez-dev. Flujo: Inicio → Rutinas → Detalle → Entrenamiento → Descanso → Resumen. Se conectaron también catálogo, detalle, creación y edición de rutinas existentes. No se modificaron MainActivity, Routes, Gradle, manifiesto ni tema.
 
 | Pantalla / callback | Conexión requerida |
 |---|---|
-| `WorkoutScreen(routineId, onRest, onFinish, onExit)` | Usar la ruta existente `workout/{routineId}`. El ID distingue sesiones/rutinas, pero por ahora todas muestran la rutina de demostración, no los datos de Joel. |
+| `WorkoutScreen(routineId, onRest, onFinish, onExit)` | Usar la ruta existente `workout/{routineId}`. El ID identifica la rutina; pasar además `routine` desde la lista local compartida. |
 | `onRest: () -> Unit` | Navegar a `rest` conservando la entrada de entrenamiento en el back stack. |
 | `onFinish: (Int, Int, Int) -> Unit` | Recibe duración en segundos, series completadas y repeticiones completadas, en ese orden. Conservar esos tres valores en estado local guardable del flujo y navegar a `summary`. |
 | `onExit: () -> Unit` | Retirar la entrada de entrenamiento y regresar al detalle de rutina o Inicio; no dejar una sesión abandonada recuperable con Atrás. |
@@ -26,7 +26,7 @@ No se modificaron MainActivity, AppNavigation, Routes, Gradle, manifiesto ni tem
 | `onHome: () -> Unit` | Volver a Inicio retirando descanso, resumen y entrenamiento del back stack. Atrás en resumen ejecuta el mismo callback. |
 | `onRepeat: () -> Unit` | Retirar el resumen y la entrada anterior de entrenamiento; crear una nueva entrada de `workout` para reiniciar el estado, incluso con el mismo routineId. |
 
-La duración de sesión es tiempo transcurrido desde que se abrió entrenamiento hasta Ver resumen, incluyendo descansos y segundo plano. El contador de descanso, en cambio, se pausa en segundo plano. No se incorporaron modelos compartidos, datos persistentes, servicios, ViewModels ni dependencias.
+La duración de sesión es tiempo transcurrido desde que se abrió entrenamiento hasta Ver resumen, incluyendo descansos y segundo plano. El contador de descanso, en cambio, se pausa en segundo plano. Se reutilizan los modelos compartidos de Joel, sin datos persistentes, servicios, ViewModels ni dependencias nuevas.
 
 ## Comprobación reproducible
 
@@ -43,7 +43,7 @@ Se agregaron instrucciones específicas en `.agents/skills/gymmate-entrenamiento
 
 17/10/2026: Codex ayudó con las pantallas del integrante 4, pruebas y skills. Revisión humana del código por José y conexión final de Jordy pendientes.
 
-## Resultados de validación
+## Resultados originales de José (anteriores a la integración)
 
 - `:app:assembleDebug`: correcto.
 - `:app:testDebugUnitTest`: 2 pruebas correctas (incluye la prueba existente y WorkoutTimeTest).
@@ -55,3 +55,16 @@ Se agregaron instrucciones específicas en `.agents/skills/gymmate-entrenamiento
 ## Incidencia ajena al módulo: texto de Registro en modo oscuro
 
 José reportó texto invisible al escribir durante la prueba física. Se identificó Registro como pantalla activa y modo nocturno habilitado en el TECNO LE7. El tema de ventana utiliza `Theme.Material.Light.NoActionBar`, mientras Compose selecciona el tema oscuro; MainActivity no pinta un Surface de fondo y los formularios tampoco. Esto permite texto claro sobre el fondo claro de la ventana. Jordy debe revisar el fondo raíz con `MaterialTheme.colorScheme.background`/`Surface` y verificar Login y Registro en ambos modos. No se modificaron esos archivos por pertenecer a autenticación/integración. Las pantallas de entrenamiento sí pintan su fondo con Surface.
+
+## Integración con main y verificación actual
+
+La rama de José partía de una base anterior; se integran sus dos commits sin reescribir su autoría. Se resuelve el conflicto de la skill conservando las reglas de equipo y documentando el contrato actualizado.
+
+- Cuenta GitHub de integración: SebastianAlvarez-dev, Sebastian Esteban Álvarez De La Rosa; correo público verificado e1758359374@live.uleam.edu.ec.
+- Compilación :app:assembleDebug, pruebas :app:testDebugUnitTest y compilación :app:assembleDebugAndroidTest correctas.
+- Nueva prueba instrumentada de rutina variable: Día de piernas, cuatro series y sesenta repeticiones.
+- No había dispositivo conectado ni AVD configurado: las pruebas instrumentadas y la revisión visual de esta integración quedan pendientes. Los resultados físicos anteriores de José no validan esta navegación nueva.
+- Historial, Progreso y Configuración conservan destinos informativos pendientes de Jandry. No se implementaron sus módulos.
+- Las rutinas creadas/editadas se conservan solo en memoria durante esta sesión; los resultados del resumen usan estado guardable. No se añade persistencia al MVP.
+
+Corrección del historial autorizada: los dos commits de José (cuenta JagoWoa) se reaplicaron después de la integración de Joel, conservando autor y fecha de autor. El merge pertenece a SebastianAlvarez-dev. Se conservaron respaldos locales del historial anterior.

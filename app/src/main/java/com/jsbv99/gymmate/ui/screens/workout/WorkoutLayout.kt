@@ -19,7 +19,7 @@ internal fun WorkoutLayout(title: String, modifier: Modifier, content: @Composab
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text("GYMMATE · ENTRENAMIENTO", style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.secondary)
+                    color = MaterialTheme.colorScheme.onBackground)
                 Text(title, style = MaterialTheme.typography.headlineMedium)
                 content()
             }

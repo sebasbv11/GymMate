@@ -16,12 +16,13 @@ fun WorkoutSummaryScreen(
     modifier: Modifier = Modifier,
     durationSeconds: Int = 1200,
     completedSets: Int = 9,
-    completedReps: Int = 108
+    completedReps: Int = 108,
+    routineName: String = "Cuerpo completo"
 ) {
     BackHandler(onBack = onHome)
     WorkoutLayout("¡Buen trabajo!", modifier) {
         Text("Resumen del entrenamiento", style = MaterialTheme.typography.titleLarge)
-        Text("Rutina de demostración · Cuerpo completo")
+        Text(routineName)
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text("Duración: ${workoutTime(durationSeconds)}", style = MaterialTheme.typography.headlineSmall)

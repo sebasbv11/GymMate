@@ -32,6 +32,22 @@ class WorkoutScreensTest {
         compose.runOnIdle { assertEquals(8, rests); assertEquals(1, summaries) }
     }
 
+    @Test fun usesSelectedRoutineSetsAndRepetitions() {
+        val routine = com.jsbv99.gymmate.data.RoutineSamples.routines.last()
+        compose.setContent {
+            GymMateTheme {
+                WorkoutScreen(routine.id, {}, { _, sets, reps ->
+                    assertEquals(4, sets)
+                    assertEquals(60, reps)
+                }, {}, routine = routine)
+            }
+        }
+        compose.onNodeWithText("Día de piernas").assertExists()
+        repeat(4) { compose.onNodeWithText("Completar serie").performScrollTo().performClick() }
+        compose.onNodeWithText("4 de 4 series completadas").assertExists()
+        compose.onNodeWithText("Ver resumen").performScrollTo().performClick()
+    }
+
     @Test fun preservesProgressAndConfirmsExit() {
         var exits = 0
         val restoration = StateRestorationTester(compose)
