@@ -38,7 +38,10 @@ fun RegisterScreen(
     onBack: () -> Unit,
     onRegisterSuccess: (String) -> Unit,
     onLogin: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    loading: Boolean = false,
+    error: String? = null,
+    onSubmit: (String, String, String) -> Unit = { name, _, _ -> onRegisterSuccess(name) }
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
@@ -128,18 +131,20 @@ fun RegisterScreen(
                     imeAction = ImeAction.Done
                 )
             )
+            if (error != null) Text(error, color = MaterialTheme.colorScheme.error)
             Button(
+                enabled = !loading,
                 onClick = {
                     attempted = true
                     if (nameValid && emailValid && passwordValid && confirmationValid) {
-                        onRegisterSuccess(name.trim())
+                        onSubmit(name.trim(), email.trim(), password)
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text("Crear cuenta")
+                Text(if (loading) "Espera..." else "Crear cuenta")
             }
             TextButton(onClick = onLogin, modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 Text("¿Ya tienes una cuenta? Inicia sesión")

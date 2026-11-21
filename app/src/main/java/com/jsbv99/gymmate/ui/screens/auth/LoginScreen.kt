@@ -42,7 +42,10 @@ fun LoginScreen(
     onBack: () -> Unit,
     onLoginSuccess: () -> Unit,
     onRegister: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    loading: Boolean = false,
+    error: String? = null,
+    onSubmit: (String, String) -> Unit = { _, _ -> onLoginSuccess() }
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -116,16 +119,18 @@ fun LoginScreen(
                     imeAction = ImeAction.Done
                 )
             )
+            if (error != null) Text(error, color = MaterialTheme.colorScheme.error)
             Button(
+                enabled = !loading,
                 onClick = {
                     attempted = true
-                    if (emailValid && passwordValid) onLoginSuccess()
+                    if (emailValid && passwordValid) onSubmit(email.trim(), password)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text("Entrar")
+                Text(if (loading) "Espera..." else "Entrar")
             }
             OutlinedButton(
                 onClick = onRegister,
