@@ -3,7 +3,6 @@ package com.jsbv99.gymmate.navigation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
@@ -11,6 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jsbv99.gymmate.di.LocalAppContainer
 import com.jsbv99.gymmate.di.exercisesFactory
+import com.jsbv99.gymmate.di.workoutFactory
 import com.jsbv99.gymmate.di.routinesFactory
 import com.jsbv99.gymmate.ui.screens.auth.*
 import com.jsbv99.gymmate.ui.screens.exercises.*
@@ -26,14 +26,26 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     val auth: AuthViewModel = viewModel(factory = container.factory { AuthViewModel(container.authRepository) })
     val exercises: ExercisesViewModel = viewModel(factory = exercisesFactory(container.exerciseRepository))
     val routinesModel: RoutinesViewModel = viewModel(factory = routinesFactory(container.routineRepository))
-    val routines by routinesModel.routines.collectAsStateWithLifecycle()
-    var workoutId by rememberSaveable { mutableStateOf("") }
-    var duration by rememberSaveable { mutableIntStateOf(0) }
-    var sets by rememberSaveable { mutableIntStateOf(0) }
-    var reps by rememberSaveable { mutableIntStateOf(0) }
+    val workout: WorkoutViewModel = viewModel(factory = workoutFactory(container.routineRepository, container.workoutRepository))
+    val workoutState by workout.uiState.collectAsStateWithLifecycle()
+    val sessions by container.workoutRepository.sessions.collectAsStateWithLifecycle()
+    val entry by navController.currentBackStackEntryAsState()
+    // El estado es la fuente de verdad: recrear la ruta no consume ni repite eventos.
+    LaunchedEffect(workoutState.phase, entry) {
+        val route = entry?.destination?.route
+        when {
+            workoutState.phase == WorkoutPhase.REST && route == Routes.Workout ->
+                navController.navigate(Routes.Rest) { launchSingleTop = true }
+            workoutState.phase == WorkoutPhase.ACTIVE && route == Routes.Rest -> navController.popBackStack()
+            workoutState.phase == WorkoutPhase.SUMMARY && route == Routes.Workout ->
+                navController.navigate(Routes.Summary) {
+                    popUpTo(Routes.Workout) { inclusive = true }
+                    launchSingleTop = true
+                }
+        }
+    }
     fun startWorkout(id: String) {
-        workoutId = id
-        navController.navigate("workout/$id")
+        if (workout.start(id)) navController.navigate("workout/$id") { launchSingleTop = true }
     }
 
     NavHost(
@@ -110,35 +122,25 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     navController.navigate(Routes.CreateRoutine)
                 }, onStart = ::startWorkout)
         }
-        composable(Routes.Workout) { entry ->
-            val id = entry.arguments?.getString("routineId").orEmpty()
-            val routine = routines.find { it.id == id }
-            if (routine == null) {
-                PendingScreen("Rutina no disponible", { navController.popBackStack() })
-            } else WorkoutScreen(id,
-                onRest = { navController.navigate(Routes.Rest) { launchSingleTop = true } },
-                onFinish = { seconds, completedSets, completedReps ->
-                    duration = seconds; sets = completedSets; reps = completedReps
-                    navController.navigate(Routes.Summary) {
-                        popUpTo(Routes.Workout) { inclusive = true }
-                    }
-                },
-                onExit = { navController.popBackStack() }, routine = routine)
+        composable(Routes.Workout) {
+            if (workoutState.routine == null) PendingScreen("Rutina no disponible", { navController.popBackStack() })
+            else WorkoutRoute(workout, onExit = { workout.clear(); navController.popBackStack() })
         }
-        composable(Routes.Rest) {
-            RestScreen(onSkip = { navController.popBackStack() }, onFinish = { navController.popBackStack() })
-        }
+        composable(Routes.Rest) { RestRoute(workout) }
         composable(Routes.Summary) {
-            WorkoutSummaryScreen(
-                onHome = { navController.popBackStack(Routes.Home, false) },
+            if (workoutState.result == null) PendingScreen("Sesión no disponible", { navController.popBackStack(Routes.Home, false) })
+            else WorkoutSummaryRoute(workout,
+                onHome = { workout.clear(); navController.popBackStack(Routes.Home, false) },
                 onRepeat = {
-                    navController.popBackStack()
-                    startWorkout(workoutId)
-                }, durationSeconds = duration, completedSets = sets, completedReps = reps,
-                routineName = routines.find { it.id == workoutId }?.name ?: "Rutina local")
+                    val id = workoutState.routine?.id.orEmpty()
+                    if (workout.repeat()) {
+                        navController.popBackStack()
+                        navController.navigate("workout/$id") { launchSingleTop = true }
+                    }
+                })
         }
         composable(Routes.History) {
-            HistorialScreen(onBack = { navController.popBackStack() }, onProgress = {
+            HistorialScreen(sessions = sessions, onBack = { navController.popBackStack() }, onProgress = {
                 if (!navController.popBackStack(Routes.Progress, false)) navController.navigate(Routes.Progress)
             })
         }

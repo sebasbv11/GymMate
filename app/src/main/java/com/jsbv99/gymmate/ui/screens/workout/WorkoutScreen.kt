@@ -1,8 +1,6 @@
 package com.jsbv99.gymmate.ui.screens.workout
 
-import android.os.SystemClock
 import com.jsbv99.gymmate.data.RoutineSamples
-import com.jsbv99.gymmate.model.Routine
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -16,29 +14,24 @@ import com.jsbv99.gymmate.ui.theme.GymMateTheme
 /** Uses the selected local routine; progress survives the rest destination. */
 @Composable
 fun WorkoutScreen(
-    routineId: String,
-    onRest: () -> Unit,
-    onFinish: (durationSeconds: Int, completedSets: Int, completedReps: Int) -> Unit,
+    state: WorkoutUiState,
+    onCompleteSet: () -> Unit,
+    onFinish: () -> Unit,
     onExit: () -> Unit,
-    modifier: Modifier = Modifier,
-    routine: Routine = RoutineSamples.routines.first()
+    modifier: Modifier = Modifier
 ) {
+    val routine = state.routine ?: return
     val exercises = routine.exercises
-    val totalSets = exercises.sumOf { it.sets }
-    var completedSets by rememberSaveable(routineId) { mutableIntStateOf(0) }
-    var startedAt by rememberSaveable(routineId) { mutableLongStateOf(SystemClock.elapsedRealtime()) }
-    var exitDialog by rememberSaveable(routineId) { mutableStateOf(false) }
-    var finished by rememberSaveable(routineId) { mutableStateOf(false) }
-    // The monotonic clock can reset after a device reboot; avoid a negative session duration.
-    if (startedAt > SystemClock.elapsedRealtime()) startedAt = SystemClock.elapsedRealtime()
-    val exerciseIndex = exercises.indices.firstOrNull { index ->
-        completedSets < exercises.take(index + 1).sumOf { it.sets }
-    } ?: exercises.lastIndex
+    val totalSets = state.totalSets
+    val completedSets = state.completedSets
+    val exerciseIndex = state.exerciseIndex
     val item = exercises[exerciseIndex]
-    val previousSets = exercises.take(exerciseIndex).sumOf { it.sets }
+    val previousSets = state.previousSets
     val currentSet = completedSets - previousSets + 1
     val repsPerSet = item.repetitions
-    BackHandler { exitDialog = true }
+    var exitDialog by rememberSaveable(state.sessionId) { mutableStateOf(false) }
+    var leaving by rememberSaveable(state.sessionId) { mutableStateOf(false) }
+    BackHandler { if (!state.saving) exitDialog = true }
 
     WorkoutLayout("Entrenamiento activo", modifier) {
         Text(routine.name, style = MaterialTheme.typography.titleMedium)
@@ -57,28 +50,23 @@ fun WorkoutScreen(
             }
         }
         if (completedSets < totalSets) {
-            Button(onClick = {
-                completedSets++
-                if (completedSets < totalSets) onRest()
-            }, enabled = !finished, modifier = Modifier.fillMaxWidth()) { Text("Completar serie") }
+            Button(onClick = onCompleteSet, enabled = !state.saving && state.phase == WorkoutPhase.ACTIVE,
+                modifier = Modifier.fillMaxWidth()) { Text("Completar serie") }
         } else {
             Text("¡Completaste la rutina!", style = MaterialTheme.typography.titleLarge)
-            Button(onClick = {
-                if (!finished) {
-                    finished = true
-                    val seconds = ((SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0) / 1000).toInt()
-                    onFinish(seconds, completedSets, exercises.sumOf { it.sets * it.repetitions })
-                }
-            }, enabled = !finished, modifier = Modifier.fillMaxWidth()) { Text("Ver resumen") }
+            Button(onClick = onFinish, enabled = !state.saving && state.phase == WorkoutPhase.ACTIVE,
+                modifier = Modifier.fillMaxWidth()) { Text(if (state.saving) "Guardando sesión…" else "Ver resumen") }
         }
-        OutlinedButton(onClick = { exitDialog = true }, modifier = Modifier.fillMaxWidth()) { Text("Salir del entrenamiento") }
+        Text("Duración: ${workoutTime(state.durationSeconds)}")
+        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        OutlinedButton(onClick = { exitDialog = true }, enabled = !state.saving, modifier = Modifier.fillMaxWidth()) { Text("Salir del entrenamiento") }
     }
     if (exitDialog) {
         AlertDialog(
             onDismissRequest = { exitDialog = false },
             title = { Text("¿Salir del entrenamiento?") },
-            text = { Text("Esta sesión de demostración no se guardará.") },
-            confirmButton = { TextButton(onClick = { exitDialog = false; onExit() }) { Text("Salir") } },
+            text = { Text("El avance de esta sesión se descartará y no aparecerá en el historial.") },
+            confirmButton = { TextButton(onClick = { if (!leaving) { leaving = true; exitDialog = false; onExit() } }) { Text("Salir") } },
             dismissButton = { TextButton(onClick = { exitDialog = false }) { Text("Continuar") } }
         )
     }
@@ -88,5 +76,5 @@ fun WorkoutScreen(
 @Preview(showBackground = true, widthDp = 640, heightDp = 360, fontScale = 1.5f)
 @Composable
 private fun WorkoutPreview() {
-    GymMateTheme { WorkoutScreen("demo", {}, { _, _, _ -> }, {}) }
+    GymMateTheme { WorkoutScreen(WorkoutUiState(routine = RoutineSamples.routines.first()), {}, {}, {}) }
 }

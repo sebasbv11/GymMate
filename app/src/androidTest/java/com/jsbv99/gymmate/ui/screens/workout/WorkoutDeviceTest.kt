@@ -24,7 +24,7 @@ class WorkoutDeviceTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
     @Test fun restPausesWhileActivityIsStopped() {
-        compose.setContent { GymMateTheme { RestScreen({}, {}, durationSeconds = 30) } }
+        compose.setContent { GymMateTheme { RestTestContent(30) } }
         compose.waitForIdle()
         fun remaining(): Int = compose.onNode(SemanticsMatcher("Cuenta regresiva") { node ->
             node.config.contains(SemanticsProperties.Text) &&
@@ -49,7 +49,7 @@ class WorkoutDeviceTest {
                 GymMateTheme {
                     Box(if (compact.value) Modifier.requiredSize(320.dp, 360.dp) else Modifier) {
                         when (screen.intValue) {
-                            0 -> WorkoutScreen("demo", {}, { _, _, _ -> }, {})
+                            0 -> WorkoutScreen(WorkoutUiState(routine = com.jsbv99.gymmate.data.RoutineSamples.routines.first()), {}, {}, {})
                             1 -> RestScreen({}, {})
                             else -> WorkoutSummaryScreen({}, {})
                         }

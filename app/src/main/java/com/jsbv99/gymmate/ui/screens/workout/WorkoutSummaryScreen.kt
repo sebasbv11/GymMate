@@ -17,7 +17,9 @@ fun WorkoutSummaryScreen(
     durationSeconds: Int = 1200,
     completedSets: Int = 9,
     completedReps: Int = 108,
-    routineName: String = "Cuerpo completo"
+    routineName: String = "Cuerpo completo",
+    sessionSaved: Boolean = false,
+    error: String? = null
 ) {
     BackHandler(onBack = onHome)
     WorkoutLayout("¡Buen trabajo!", modifier) {
@@ -31,8 +33,10 @@ fun WorkoutSummaryScreen(
                 Text("Calorías simuladas: 150 kcal")
             }
         }
-        Text("Sesión local de demostración. Los resultados no se guardan en el historial.",
+        Text(if (sessionSaved) "Sesión guardada en el historial de esta ejecución. Los datos en memoria se pierden al cerrar el proceso."
+            else "Vista previa de una sesión de demostración.",
             color = MaterialTheme.colorScheme.onSurfaceVariant)
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         Button(onClick = onHome, modifier = Modifier.fillMaxWidth()) { Text("Volver al inicio") }
         OutlinedButton(onClick = onRepeat, modifier = Modifier.fillMaxWidth()) { Text("Repetir entrenamiento") }
     }

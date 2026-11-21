@@ -13,6 +13,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 
 class AppContainer {
+    val workoutRepository: com.jsbv99.gymmate.data.workout.WorkoutRepository =
+        com.jsbv99.gymmate.data.workout.FakeWorkoutRepository()
     val authRepository: AuthRepository = FakeAuthRepository()
     val exerciseRepository: ExerciseRepository = FakeExerciseRepository()
     val routineRepository: RoutineRepository = FakeRoutineRepository()

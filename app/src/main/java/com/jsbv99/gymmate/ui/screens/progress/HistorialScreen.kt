@@ -10,12 +10,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jsbv99.gymmate.ui.theme.GymMateTheme
+import com.jsbv99.gymmate.model.WorkoutSession
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
-fun HistorialScreen(onBack: () -> Unit, onProgress: () -> Unit, modifier: Modifier = Modifier) {
+fun HistorialScreen(onBack: () -> Unit, onProgress: () -> Unit, modifier: Modifier = Modifier, sessions: List<WorkoutSession> = emptyList()) {
     var expandedSession by rememberSaveable { mutableStateOf<String?>(null) }
     // Ejemplos independientes del registro real de entrenamientos.
-    val sessions = remember { listOf(
+    val examples = remember { listOf(
         listOf("16 oct 2026", "Cuerpo completo", "40 min", "12 series", "Sentadillas, flexiones y plancha"),
         listOf("14 oct 2026", "Tren superior", "45 min", "15 series", "Remo, press de pecho y curl de bíceps"),
         listOf("12 oct 2026", "Piernas", "35 min", "12 series", "Sentadillas, zancadas y elevación de talones"),
@@ -37,7 +41,22 @@ fun HistorialScreen(onBack: () -> Unit, onProgress: () -> Unit, modifier: Modifi
                     OutlinedButton(onClick = onProgress) { Text("Consultar progreso") }
                 }
             }
-            items(sessions, key = { it[0] }) { session ->
+            items(sessions, key = { it.id }) { session ->
+                val expanded = expandedSession == session.id
+                Card(onClick = { expandedSession = if (expanded) null else session.id }) {
+                    Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(SimpleDateFormat("dd MMM yyyy · HH:mm", Locale.forLanguageTag("es-EC")).format(Date(session.finishedAtMillis)),
+                            style = MaterialTheme.typography.labelLarge)
+                        Text(session.routine.name, style = MaterialTheme.typography.titleLarge)
+                        Text("${session.durationSeconds / 60} min ${session.durationSeconds % 60} s · ${session.completedSets} series")
+                        Text("${session.completedReps} repeticiones · Guardada en memoria")
+                        Text(if (expanded) "Ocultar ejercicios" else "Ver ejercicios", color = MaterialTheme.colorScheme.primary)
+                        if (expanded) Text(session.routine.exercises.joinToString { it.exercise.name })
+                    }
+                }
+            }
+            item { Text("Sesiones de ejemplo · Octubre de 2026", style = MaterialTheme.typography.titleMedium) }
+            items(examples, key = { "example-${it[0]}" }) { session ->
                 val expanded = expandedSession == session[0]
                 Card(onClick = { expandedSession = if (expanded) null else session[0] }) {
                     Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

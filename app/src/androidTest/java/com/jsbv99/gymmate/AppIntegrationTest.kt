@@ -67,6 +67,7 @@ class AppIntegrationTest {
             }
         }
         scrollClick("Ver resumen")
+        compose.waitUntil(5000) { compose.onAllNodesWithText("Resumen del entrenamiento").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Series completadas: 4").assertExists()
         compose.onNodeWithText("Repeticiones completadas: 60").assertExists()
         capture("summary")
@@ -79,6 +80,26 @@ class AppIntegrationTest {
         click("Salir")
         compose.onNodeWithText("Iniciar entrenamiento").assertExists()
     }
+    @Test fun completedWorkoutAppearsInHistoryOnce() {
+        login()
+        scrollClick("Ver mis rutinas")
+        scrollClick("Día de piernas")
+        scrollClick("Iniciar entrenamiento")
+        repeat(4) { index ->
+            scrollClick("Completar serie")
+            if (index < 3) scrollClick("Omitir descanso")
+        }
+        scrollClick("Ver resumen")
+        compose.waitUntil(5000) { compose.onAllNodesWithText("Series completadas: 4").fetchSemanticsNodes().isNotEmpty() }
+        compose.activityRule.scenario.recreate()
+        compose.waitForIdle()
+        compose.onNodeWithText("Series completadas: 4").assertExists()
+        scrollClick("Volver al inicio")
+        scrollClick("Historial de entrenamientos")
+        compose.onNodeWithText("Día de piernas").performScrollTo().assertExists()
+        compose.onAllNodesWithText("60 repeticiones · Guardada en memoria").assertCountEquals(1)
+    }
+
     @Test fun createEditAndRotateCustomRoutine() {
         login()
         scrollClick("Ver mis rutinas")
