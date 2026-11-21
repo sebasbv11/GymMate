@@ -7,10 +7,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
-import com.jsbv99.gymmate.data.RoutineSamples
-import com.jsbv99.gymmate.model.Routine
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jsbv99.gymmate.di.LocalAppContainer
+import com.jsbv99.gymmate.di.exercisesFactory
+import com.jsbv99.gymmate.di.routinesFactory
 import com.jsbv99.gymmate.ui.screens.auth.*
-import com.jsbv99.gymmate.ui.screens.home.HomeScreen
 import com.jsbv99.gymmate.ui.screens.exercises.*
 import com.jsbv99.gymmate.ui.screens.routines.*
 import com.jsbv99.gymmate.ui.screens.workout.*
@@ -20,9 +22,11 @@ import com.jsbv99.gymmate.ui.screens.settings.ConfiguracionScreen
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    // shortcut: saved session state only; add disk persistence if the MVP scope changes.
-    var routines by rememberSaveable { mutableStateOf(ArrayList(RoutineSamples.routines)) }
-    var userName by rememberSaveable { mutableStateOf("deportista") }
+    val container = LocalAppContainer.current
+    val auth: AuthViewModel = viewModel(factory = container.factory { AuthViewModel(container.authRepository) })
+    val exercises: ExercisesViewModel = viewModel(factory = exercisesFactory(container.exerciseRepository))
+    val routinesModel: RoutinesViewModel = viewModel(factory = routinesFactory(container.routineRepository))
+    val routines by routinesModel.routines.collectAsStateWithLifecycle()
     var workoutId by rememberSaveable { mutableStateOf("") }
     var duration by rememberSaveable { mutableIntStateOf(0) }
     var sets by rememberSaveable { mutableIntStateOf(0) }
@@ -44,9 +48,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             )
         }
         composable(Routes.Login) {
-            LoginScreen(
+            LoginRoute(
+                model = auth,
                 onBack = { navController.popBackStack() },
-                onLoginSuccess = {
+                onLogin = {
                     navController.navigate(Routes.Home) {
                         popUpTo(Routes.Splash) { inclusive = true }
                     }
@@ -55,10 +60,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             )
         }
         composable(Routes.Register) {
-            RegisterScreen(
+            RegisterRoute(
+                model = auth,
                 onBack = { navController.popBackStack() },
-                onRegisterSuccess = { name ->
-                    userName = name
+                onRegister = {
                     navController.navigate(Routes.Home) {
                         popUpTo(Routes.Splash) { inclusive = true }
                     }
@@ -67,15 +72,14 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             )
         }
         composable(Routes.Home) {
-            HomeScreen(
+            HomeRoute(
+                model = auth,
                 onExercises = { navController.navigate(Routes.Exercises) },
                 onRoutines = { navController.navigate(Routes.Routines) },
                 onHistory = { navController.navigate(Routes.History) },
                 onProgress = { navController.navigate(Routes.Progress) },
                 onSettings = { navController.navigate(Routes.Settings) },
-                userName = userName,
                 onSignOut = {
-                    userName = "deportista"
                     navController.navigate(Routes.Splash) {
                         popUpTo(Routes.Home) { inclusive = true }
                     }
@@ -83,36 +87,28 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             )
         }
         composable(Routes.Exercises) {
-            ExercisesScreen({ navController.popBackStack() }, { navController.navigate("exercise/$it") })
+            ExercisesRoute(exercises, { navController.popBackStack() }, { navController.navigate("exercise/$it") })
         }
         composable(Routes.ExerciseDetail) { entry ->
-            ExerciseDetailScreen(entry.arguments?.getString("exerciseId").orEmpty(), { navController.popBackStack() })
+            ExerciseDetailRoute(exercises, entry.arguments?.getString("exerciseId").orEmpty(), { navController.popBackStack() })
         }
         composable(Routes.Routines) {
-            RoutinesScreen({ navController.popBackStack() }, { navController.navigate(Routes.CreateRoutine) },
-                { navController.navigate("routine/$it") }, routines)
+            RoutinesRoute(routinesModel, { navController.popBackStack() }, { navController.navigate(Routes.CreateRoutine) },
+                { navController.navigate("routine/$it") })
         }
         composable(Routes.CreateRoutine) {
             val editId = navController.previousBackStackEntry?.savedStateHandle?.get<String>("editRoutineId")
-            RoutineEditorScreen(
+            RoutineEditorRoute(routinesModel, exercises, editId,
                 onBack = { navController.popBackStack() },
-                onSaveRoutine = { routine ->
-                    val index = routines.indexOfFirst { it.id == routine.id }
-                    routines = ArrayList(routines).apply {
-                        if (index < 0) add(routine) else set(index, routine)
-                    }
-                    navController.popBackStack()
-                },
-                routine = routines.find { it.id == editId }
-            )
+                onSaved = { navController.popBackStack() })
         }
         composable(Routes.RoutineDetail) { entry ->
-            RoutineDetailScreen(routines.find { it.id == entry.arguments?.getString("routineId") },
+            RoutineDetailRoute(routinesModel, entry.arguments?.getString("routineId").orEmpty(),
                 onBack = { navController.popBackStack() },
-                onEditRoutine = {
+                onEdit = {
                     entry.savedStateHandle["editRoutineId"] = it
                     navController.navigate(Routes.CreateRoutine)
-                }, onStartWorkout = ::startWorkout)
+                }, onStart = ::startWorkout)
         }
         composable(Routes.Workout) { entry ->
             val id = entry.arguments?.getString("routineId").orEmpty()
