@@ -7,6 +7,9 @@ import com.jsbv99.gymmate.data.RoutineSamples
 import com.jsbv99.gymmate.data.routines.RoutineRepository
 import com.jsbv99.gymmate.data.workout.WorkoutRepository
 import com.jsbv99.gymmate.model.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
@@ -34,25 +37,31 @@ class CloudRoutineRepository(private val auth: FirebaseAuth, private val db: Fir
     private val data = MutableStateFlow<List<Routine>>(emptyList())
     override val routines = data.asStateFlow()
     private var listener: ListenerRegistration? = null
+    private val lock = Any()
+    private val io = Dispatchers.IO.limitedParallelism(1).asExecutor()
+    private var generation = 0
     init {
-        auth.addAuthStateListener { state ->
+        auth.addAuthStateListener { state -> synchronized(lock) {
+            generation++
+            val listenerGeneration = generation
             listener?.remove()
             data.value = emptyList()
             val uid = state.currentUser?.uid
-            if (uid != null) listener = db.collection("users").document(uid).collection("routines").addSnapshotListener { snapshot, error ->
-                if (auth.currentUser?.uid == uid && error == null && snapshot != null) {
+            if (uid != null) listener = db.collection("users").document(uid).collection("routines").addSnapshotListener(io) { snapshot, error -> synchronized(lock) {
+                if (generation == listenerGeneration && auth.currentUser?.uid == uid && error == null && snapshot != null) {
                     val saved = snapshot.documents.mapNotNull { doc ->
                         runCatching { JSONObject(requireNotNull(doc.getString("data"))).routine().also { require(it.id == doc.id) } }.getOrNull()
                     }
                     data.value = RoutineSamples.routines.filterNot { sample -> saved.any { it.id == sample.id } } + saved
                 }
-            }
-        }
+            } }
+        } }
     }
-    override suspend fun save(routine: Routine) {
+    override suspend fun save(routine: Routine) = withContext(Dispatchers.IO) {
         val uid = requireNotNull(auth.currentUser?.uid) { "Inicia sesión para guardar la rutina." }
         db.collection("users").document(uid).collection("routines").document(routine.id)
             .set(mapOf("data" to routine.json().toString())).await()
+        Unit
     }
 }
 
@@ -60,23 +69,29 @@ class CloudWorkoutRepository(private val auth: FirebaseAuth, private val db: Fir
     private val data = MutableStateFlow<List<WorkoutSession>>(emptyList())
     override val sessions = data.asStateFlow()
     private var listener: ListenerRegistration? = null
+    private val lock = Any()
+    private val io = Dispatchers.IO.limitedParallelism(1).asExecutor()
+    private var generation = 0
     init {
-        auth.addAuthStateListener { state ->
+        auth.addAuthStateListener { state -> synchronized(lock) {
+            generation++
+            val listenerGeneration = generation
             listener?.remove()
             data.value = emptyList()
             val uid = state.currentUser?.uid
-            if (uid != null) listener = db.collection("users").document(uid).collection("sessions").addSnapshotListener { snapshot, error ->
-                if (auth.currentUser?.uid == uid && error == null && snapshot != null) {
+            if (uid != null) listener = db.collection("users").document(uid).collection("sessions").addSnapshotListener(io) { snapshot, error -> synchronized(lock) {
+                if (generation == listenerGeneration && auth.currentUser?.uid == uid && error == null && snapshot != null) {
                     data.value = snapshot.documents.mapNotNull { doc ->
                         runCatching { JSONObject(requireNotNull(doc.getString("data"))).session(doc.id) }.getOrNull()
                     }.sortedByDescending { it.finishedAtMillis }
                 }
-            }
-        }
+            } }
+        } }
     }
-    override suspend fun save(session: WorkoutSession) {
+    override suspend fun save(session: WorkoutSession) = withContext(Dispatchers.IO) {
         val uid = requireNotNull(auth.currentUser?.uid) { "Inicia sesión para guardar el entrenamiento." }
         db.collection("users").document(uid).collection("sessions").document(session.id)
             .set(mapOf("data" to session.json().toString())).await()
+        Unit
     }
 }
