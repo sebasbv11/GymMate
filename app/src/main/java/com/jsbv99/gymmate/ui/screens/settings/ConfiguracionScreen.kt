@@ -6,8 +6,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -15,15 +14,22 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jsbv99.gymmate.di.LocalAppContainer
 import com.jsbv99.gymmate.ui.theme.GymMateTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.roundToInt
 
 @Composable
-fun ConfiguracionScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
-    var reminders by rememberSaveable { mutableStateOf(true) }
-    var sound by rememberSaveable { mutableStateOf(false) }
-    var unit by rememberSaveable { mutableStateOf("Kilogramos (kg)") }
-    var rest by rememberSaveable { mutableFloatStateOf(60f) }
+fun ConfiguracionScreen(
+    onBack: () -> Unit,
+    state: ConfiguracionUiState,
+    onRemindersChange: (Boolean) -> Unit,
+    onSoundChange: (Boolean) -> Unit,
+    onUnitChange: (String) -> Unit,
+    onRestChange: (Float) -> Unit,
+    onReset: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
             Modifier.safeDrawingPadding().widthIn(max = 840.dp).fillMaxWidth()
@@ -38,23 +44,35 @@ fun ConfiguracionScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     Text("Preferencias", style = MaterialTheme.typography.titleLarge)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Recordatorios simulados", Modifier.weight(1f))
-                        Switch(modifier = Modifier.semantics { contentDescription = "Recordatorios simulados" }, checked = reminders, onCheckedChange = { reminders = it })
+                        Switch(
+                            modifier = Modifier.semantics { contentDescription = "Recordatorios simulados" },
+                            checked = state.reminders,
+                            onCheckedChange = onRemindersChange
+                        )
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Sonido de descanso simulado", Modifier.weight(1f))
-                        Switch(modifier = Modifier.semantics { contentDescription = "Sonido de descanso simulado" }, checked = sound, onCheckedChange = { sound = it })
+                        Switch(
+                            modifier = Modifier.semantics { contentDescription = "Sonido de descanso simulado" },
+                            checked = state.sound,
+                            onCheckedChange = onSoundChange
+                        )
                     }
                 }
             }
             Card {
                 Column(Modifier.fillMaxWidth().padding(20.dp).selectableGroup()) {
                     Text("Unidad de peso de ejemplo", style = MaterialTheme.typography.titleLarge)
-                    listOf("Kilogramos (kg)", "Libras (lb)").forEach { option ->
+                    listOf(ConfiguracionUiState.KILOGRAMS, ConfiguracionUiState.POUNDS).forEach { option ->
                         Row(
-                            Modifier.fillMaxWidth().selectable(selected = unit == option, role = Role.RadioButton, onClick = { unit = option }).padding(vertical = 12.dp),
+                            Modifier.fillMaxWidth().selectable(
+                                selected = state.unit == option,
+                                role = Role.RadioButton,
+                                onClick = { onUnitChange(option) }
+                            ).padding(vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            RadioButton(selected = unit == option, onClick = null)
+                            RadioButton(selected = state.unit == option, onClick = null)
                             Text(option, Modifier.padding(start = 12.dp))
                         }
                     }
@@ -63,20 +81,42 @@ fun ConfiguracionScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             Card {
                 Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Descanso de ejemplo", style = MaterialTheme.typography.titleLarge)
-                    Text("${rest.roundToInt()} segundos")
-                    Slider(modifier = Modifier.semantics { contentDescription = "Descanso de ejemplo en segundos" }, value = rest, onValueChange = { rest = it }, valueRange = 30f..180f, steps = 9)
+                    Text("${state.restSeconds} segundos")
+                    Slider(
+                        modifier = Modifier.semantics { contentDescription = "Descanso de ejemplo en segundos" },
+                        value = state.restSeconds.toFloat(),
+                        onValueChange = onRestChange,
+                        valueRange = 30f..180f,
+                        steps = 9
+                    )
                     Text("Entre 30 y 180 segundos, en intervalos de 15 segundos.")
                 }
             }
-            OutlinedButton(onClick = { reminders = true; sound = false; unit = "Kilogramos (kg)"; rest = 60f }, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = onReset, modifier = Modifier.fillMaxWidth()) {
                 Text("Restablecer opciones")
             }
         }
     }
 }
 
+/** Adaptador compatible con la llamada actual de AppNavigation. */
+@Composable
+fun ConfiguracionScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    val container = LocalAppContainer.current
+    val model: ConfiguracionViewModel = viewModel(
+        factory = container.factory { ConfiguracionViewModel() }
+    )
+    ConfiguracionRoute(model = model, onBack = onBack, modifier = modifier)
+}
+
 @Preview(showBackground = true, widthDp = 320, heightDp = 480, fontScale = 1.3f)
 @Preview(showBackground = true, widthDp = 840, heightDp = 900)
 @Composable
-private fun ConfiguracionPreview() { GymMateTheme { ConfiguracionScreen({}) } }
-
+private fun ConfiguracionPreview() {
+    GymMateTheme {
+        ConfiguracionScreen(
+            onBack = {}, state = ConfiguracionUiState(), onRemindersChange = {}, onSoundChange = {},
+            onUnitChange = {}, onRestChange = {}, onReset = {}
+        )
+    }
+}
