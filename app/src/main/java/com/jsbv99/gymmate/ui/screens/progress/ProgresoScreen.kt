@@ -76,16 +76,6 @@ fun ProgresoScreen(
     }
 }
 
-/** Adaptador compatible con la llamada actual de AppNavigation. */
-@Composable
-fun ProgresoScreen(onBack: () -> Unit, onHistory: () -> Unit, modifier: Modifier = Modifier) {
-    val container = com.jsbv99.gymmate.di.LocalAppContainer.current
-    val model: ProgressViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = container.factory { ProgressViewModel(container.workoutRepository) }
-    )
-    ProgresoRoute(model = model, onBack = onBack, onHistory = onHistory, modifier = modifier)
-}
-
 @Preview(showBackground = true, widthDp = 320, heightDp = 480, fontScale = 1.3f)
 @Preview(showBackground = true, widthDp = 840, heightDp = 900)
 @Composable

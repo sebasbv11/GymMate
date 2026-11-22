@@ -27,6 +27,7 @@ Construir el MVP de GymMate como aplicación móvil nativa usando Kotlin, Jetpac
 - En la etapa 3, usar repositorios simulados en memoria, ViewModels y flujos reactivos; coordinar los contratos compartidos con el equipo.
 - No incorporar una base de datos, API ni autenticación real sin acordar previamente el cambio de alcance con el equipo.
 - Evitar dependencias que no sean necesarias para el MVP.
+- No utilizar inyección de dependencias manual bajo ningún parámetro. Usar Hilt para proporcionar dependencias y ViewModels; no crear contenedores ni fábricas manuales para inyectarlas.
 - Mantener textos visibles en español.
 - Respetar la identidad visual y el prototipo de GymMate.
 - No borrar ni reemplazar trabajo ajeno para resolver conflictos.

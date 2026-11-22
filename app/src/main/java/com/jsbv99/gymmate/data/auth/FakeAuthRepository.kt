@@ -17,9 +17,19 @@ class FakeAuthRepository : AuthRepository {
     }
 
     override suspend fun register(name: String, email: String, password: String) = withContext(Dispatchers.IO) {
-        require(name.trim().length >= 3 && email.contains("@") && email.substringAfter("@", "").contains(".") && password.length >= 6) { "Revisa los datos ingresados" }
+        require(isValidName(name.trim()) && email.contains("@") && email.substringAfter("@", "").contains(".") && password.length >= 6) { "Revisa los datos ingresados" }
         delay(300)
         user.value = AuthUser(name.trim(), email.trim())
+    }
+
+    override suspend fun signInWithGoogle(idToken: String) {
+        require(idToken.isNotBlank())
+        user.value = AuthUser("deportista", "")
+    }
+
+    override suspend fun resetPassword(email: String) = withContext(Dispatchers.IO) {
+        require(email.contains("@")) { "Ingresa un correo válido" }
+        delay(300)
     }
 
     override suspend fun signOut() = withContext(Dispatchers.IO) {

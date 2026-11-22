@@ -6,6 +6,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -20,7 +22,7 @@ internal fun WorkoutLayout(title: String, modifier: Modifier, content: @Composab
             ) {
                 Text("GYMMATE · ENTRENAMIENTO", style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onBackground)
-                Text(title, style = MaterialTheme.typography.headlineMedium)
+                Text(title, modifier = Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineMedium)
                 content()
             }
         }

@@ -6,8 +6,11 @@ import com.jsbv99.gymmate.model.Routine
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class RoutinesViewModel(private val repository: RoutineRepository) : ViewModel() {
+@HiltViewModel
+class RoutinesViewModel @Inject constructor(private val repository: RoutineRepository) : ViewModel() {
     val routines = repository.routines
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()

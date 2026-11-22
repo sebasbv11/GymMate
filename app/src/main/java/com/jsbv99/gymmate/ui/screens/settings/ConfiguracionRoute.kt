@@ -4,9 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jsbv99.gymmate.ui.theme.ThemeMode
 
 @Composable
-fun ConfiguracionRoute(model: ConfiguracionViewModel, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun ConfiguracionRoute(model: ConfiguracionViewModel, onBack: () -> Unit, modifier: Modifier = Modifier, themeMode: ThemeMode = ThemeMode.SYSTEM, onThemeChange: (ThemeMode) -> Unit = {}) {
     val state by model.uiState.collectAsStateWithLifecycle()
     ConfiguracionScreen(
         onBack = onBack,
@@ -16,6 +17,8 @@ fun ConfiguracionRoute(model: ConfiguracionViewModel, onBack: () -> Unit, modifi
         onUnitChange = model::setUnit,
         onRestChange = model::setRestSeconds,
         onReset = model::reset,
+        themeMode = themeMode,
+        onThemeChange = onThemeChange,
         modifier = modifier
     )
 }

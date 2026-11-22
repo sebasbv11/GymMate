@@ -7,11 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jsbv99.gymmate.di.LocalAppContainer
-import com.jsbv99.gymmate.di.exercisesFactory
-import com.jsbv99.gymmate.di.workoutFactory
-import com.jsbv99.gymmate.di.routinesFactory
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.jsbv99.gymmate.ui.screens.auth.*
 import com.jsbv99.gymmate.ui.screens.exercises.*
 import com.jsbv99.gymmate.ui.screens.routines.*
@@ -22,13 +18,13 @@ import com.jsbv99.gymmate.ui.screens.settings.ConfiguracionScreen
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    val container = LocalAppContainer.current
-    val auth: AuthViewModel = viewModel(factory = container.factory { AuthViewModel(container.authRepository) })
-    val exercises: ExercisesViewModel = viewModel(factory = exercisesFactory(container.exerciseRepository))
-    val routinesModel: RoutinesViewModel = viewModel(factory = routinesFactory(container.routineRepository))
-    val workout: WorkoutViewModel = viewModel(factory = workoutFactory(container.routineRepository, container.workoutRepository))
+    val auth: AuthViewModel = hiltViewModel()
+    val exercises: ExercisesViewModel = hiltViewModel()
+    val routinesModel: RoutinesViewModel = hiltViewModel()
+    val workout: WorkoutViewModel = hiltViewModel()
+    val progress: ProgressViewModel = hiltViewModel()
     val workoutState by workout.uiState.collectAsStateWithLifecycle()
-    val sessions by container.workoutRepository.sessions.collectAsStateWithLifecycle()
+    val progressState by progress.uiState.collectAsStateWithLifecycle()
     val entry by navController.currentBackStackEntryAsState()
     // El estado es la fuente de verdad: recrear la ruta no consume ni repite eventos.
     LaunchedEffect(workoutState.phase, entry) {
@@ -50,7 +46,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = if (container.authRepository.currentUser.value != null) Routes.Home else Routes.Splash,
+        startDestination = if (auth.currentUser.value != null) Routes.Home else Routes.Splash,
         modifier = modifier
     ) {
         composable(Routes.Splash) {
@@ -141,12 +137,12 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 })
         }
         composable(Routes.History) {
-            HistorialScreen(sessions = sessions, onBack = { navController.popBackStack() }, onProgress = {
+            HistorialScreen(sessions = progressState.sessions, onBack = { navController.popBackStack() }, onProgress = {
                 if (!navController.popBackStack(Routes.Progress, false)) navController.navigate(Routes.Progress)
             })
         }
         composable(Routes.Progress) {
-            ProgresoScreen(onBack = { navController.popBackStack() }, onHistory = {
+            ProgresoScreen(state = progressState, onBack = { navController.popBackStack() }, onHistory = {
                 if (!navController.popBackStack(Routes.History, false)) navController.navigate(Routes.History)
             })
         }

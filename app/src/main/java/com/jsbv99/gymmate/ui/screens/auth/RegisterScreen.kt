@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -25,12 +25,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jsbv99.gymmate.data.auth.filterName
+import com.jsbv99.gymmate.data.auth.isValidName
 import com.jsbv99.gymmate.ui.theme.GymMateTheme
 
 @Composable
@@ -49,7 +53,7 @@ fun RegisterScreen(
     var confirmation by rememberSaveable { mutableStateOf("") }
     var attempted by rememberSaveable { mutableStateOf(false) }
 
-    val nameValid = name.trim().length >= 3
+    val nameValid = isValidName(name.trim())
     val emailValid = email.contains("@") && email.substringAfter("@", "").contains(".")
     val passwordValid = password.length >= 6
     val confirmationValid = confirmation == password && confirmation.isNotEmpty()
@@ -67,7 +71,7 @@ fun RegisterScreen(
         Row(modifier = Modifier.fillMaxWidth()) {
             TextButton(onClick = onBack) { Text("← Volver") }
         }
-        Text("Crea tu cuenta", style = MaterialTheme.typography.headlineMedium)
+        Text("Crea tu cuenta", modifier = Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineMedium)
         Text(
             text = "Empieza a organizar tus entrenamientos",
             style = MaterialTheme.typography.bodyLarge,
@@ -82,12 +86,12 @@ fun RegisterScreen(
         ) {
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = { name = filterName(it) },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Nombre completo") },
                 singleLine = true,
                 isError = attempted && !nameValid,
-                supportingText = { if (attempted && !nameValid) Text("Ingresa tu nombre") },
+                supportingText = { if (attempted && !nameValid) Text("Ingresa al menos 3 letras; solo se permiten letras y espacios") },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
             OutlinedTextField(
@@ -142,7 +146,7 @@ fun RegisterScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
+                    .heightIn(min = 52.dp)
             ) {
                 Text(if (loading) "Espera..." else "Crear cuenta")
             }

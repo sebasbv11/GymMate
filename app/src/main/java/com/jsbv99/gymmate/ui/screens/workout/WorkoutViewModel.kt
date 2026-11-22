@@ -13,7 +13,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
+@HiltViewModel
 class WorkoutViewModel(
     private val routines: RoutineRepository,
     private val workouts: WorkoutRepository,
@@ -21,6 +24,8 @@ class WorkoutViewModel(
     private val monotonicMillis: () -> Long = { SystemClock.elapsedRealtime() },
     private val wallMillis: () -> Long = { System.currentTimeMillis() }
 ) : ViewModel() {
+    @Inject constructor(routines: RoutineRepository, workouts: WorkoutRepository, savedState: SavedStateHandle) :
+        this(routines, workouts, savedState, { SystemClock.elapsedRealtime() }, { System.currentTimeMillis() })
     private val mutableState = MutableStateFlow(
         (savedState.get<WorkoutUiState>(KEY) ?: WorkoutUiState()).copy(saving = false)
     )

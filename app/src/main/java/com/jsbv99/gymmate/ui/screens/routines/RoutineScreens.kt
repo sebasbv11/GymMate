@@ -1,5 +1,6 @@
 package com.jsbv99.gymmate.ui.screens.routines
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -7,6 +8,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,7 +25,7 @@ private fun RoutinePage(title: String, onBack: () -> Unit, modifier: Modifier, c
         Column(Modifier.safeDrawingPadding().imePadding().verticalScroll(rememberScrollState())
             .padding(20.dp).widthIn(max = 640.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             TextButton(onClick = onBack) { Text("← Volver") }
-            Text(title, style = MaterialTheme.typography.headlineMedium)
+            Text(title, modifier = Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineMedium)
             content()
         }
     }
@@ -87,7 +90,8 @@ fun RoutineEditorScreen(
     routine: Routine? = null,
     exercises: List<Exercise> = RoutineSamples.exercises,
     modifier: Modifier = Modifier,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    saving: Boolean = false
 ) {
     val key = routine?.id ?: "new"
     val catalog = (exercises + routine?.exercises.orEmpty().map { it.exercise }).distinctBy { it.id }
@@ -97,10 +101,25 @@ fun RoutineEditorScreen(
     var sets by rememberSaveable(key) { mutableStateOf(ArrayList(catalog.map { ex -> routine?.exercises?.find { it.exercise.id == ex.id }?.sets?.toString() ?: "3" })) }
     var reps by rememberSaveable(key) { mutableStateOf(ArrayList(catalog.map { ex -> routine?.exercises?.find { it.exercise.id == ex.id }?.repetitions?.toString() ?: "12" })) }
     var attempted by rememberSaveable(key) { mutableStateOf(false) }
+    var showDiscard by rememberSaveable(key) { mutableStateOf(false) }
+    val changed = name != routine?.name.orEmpty() || selected != routine?.exercises.orEmpty().map { it.exercise.id } ||
+        catalog.indices.any { i ->
+            val original = routine?.exercises?.find { it.exercise.id == catalog[i].id }
+            catalog[i].id in selected && (sets[i] != (original?.sets ?: 3).toString() || reps[i] != (original?.repetitions ?: 12).toString())
+        }
+    fun requestBack() { if (!saving) { if (changed) showDiscard = true else onBack() } }
+    BackHandler(enabled = !showDiscard) { requestBack() }
+    if (showDiscard) AlertDialog(
+        onDismissRequest = { showDiscard = false },
+        title = { Text("¿Descartar cambios?") },
+        text = { Text("Los cambios de esta rutina todavía no se han guardado.") },
+        confirmButton = { TextButton(onClick = { showDiscard = false; onBack() }) { Text("Descartar") } },
+        dismissButton = { TextButton(onClick = { showDiscard = false }) { Text("Seguir editando") } }
+    )
     val valid = name.isNotBlank() && selected.isNotEmpty() && catalog.indices.all { i ->
         catalog[i].id !in selected || (sets[i].toIntOrNull() in 1..20 && reps[i].toIntOrNull() in 1..100)
     }
-    RoutinePage(if (routine == null) "Crear rutina" else "Editar rutina", onBack, modifier) {
+    RoutinePage(if (routine == null) "Crear rutina" else "Editar rutina", ::requestBack, modifier) {
         OutlinedTextField(name, { name = it }, label = { Text("Nombre de la rutina") },
             isError = attempted && name.isBlank(), singleLine = true, modifier = Modifier.fillMaxWidth())
         Text("Selecciona ejercicios", style = MaterialTheme.typography.titleLarge)
@@ -133,13 +152,13 @@ fun RoutineEditorScreen(
         if (attempted && !valid) Text("Escribe un nombre, selecciona ejercicios y revisa las series y repeticiones.", color = MaterialTheme.colorScheme.error)
         if (errorMessage != null) Text(errorMessage, color = MaterialTheme.colorScheme.error)
         Text("Los cambios se guardan en tu cuenta.")
-        Button(onClick = {
+        Button(enabled = !saving, onClick = {
             attempted = true
             if (valid) onSaveRoutine(Routine(id, name.trim(), selected.map { exerciseId ->
                 val index = catalog.indexOfFirst { it.id == exerciseId }
                 RoutineExercise(catalog[index], sets[index].toInt(), reps[index].toInt())
             }))
-        }, modifier = Modifier.fillMaxWidth()) { Text("Guardar rutina") }
+        }, modifier = Modifier.fillMaxWidth()) { Text(if (saving) "Guardando…" else "Guardar rutina") }
     }
 }
 
