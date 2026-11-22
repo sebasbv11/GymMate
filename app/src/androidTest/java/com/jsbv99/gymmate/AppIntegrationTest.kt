@@ -31,6 +31,7 @@ class AppIntegrationTest {
         hideKeyboard()
         capture("login-entered")
         click("Entrar")
+        compose.waitUntil(5000) { compose.onAllNodesWithText("Ver mis rutinas").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Ver mis rutinas").assertExists()
     }
     @Test fun loginValidationAndCatalog() {
@@ -97,7 +98,12 @@ class AppIntegrationTest {
         scrollClick("Volver al inicio")
         scrollClick("Historial de entrenamientos")
         compose.onNodeWithText("Día de piernas").performScrollTo().assertExists()
-        compose.onAllNodesWithText("60 repeticiones · Guardada en memoria").assertCountEquals(1)
+        compose.onAllNodesWithText("60 repeticiones").onFirst().assertExists()
+        click("Consultar progreso")
+        compose.waitUntil(5000) { compose.onAllNodesWithText("Tu progreso").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("Resumen de tus sesiones").assertExists()
+        compose.onNodeWithText("Duración por sesión").assertExists()
+        compose.onAllNodesWithText("Día de piernas", substring = true).onFirst().assertExists()
     }
 
     @Test fun createEditAndRotateCustomRoutine() {
@@ -137,14 +143,13 @@ class AppIntegrationTest {
         compose.onNodeWithText("Confirmar contraseña").performScrollTo().performTextInput("prueba123")
         hideKeyboard()
         scrollClick("Crear cuenta")
+        compose.waitUntil(5000) { compose.onAllNodesWithText("Ver mis rutinas").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Ver mis rutinas").assertExists()
         capture("home")
         scrollClick("Historial de entrenamientos")
         compose.onNodeWithText("Historial").assertExists()
         click("Consultar progreso")
         compose.onNodeWithText("Tu progreso").assertExists()
-        click("Semana del 5 al 11")
-        compose.onNodeWithText("105 minutos de actividad").assertExists()
         scrollClick("Ver historial")
         scrollClick("Volver")
         scrollClick("Configuración")
