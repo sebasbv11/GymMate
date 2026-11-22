@@ -18,7 +18,7 @@ class RoutinesViewModel(private val repository: RoutineRepository) : ViewModel()
     } catch (cancelled: CancellationException) {
         throw cancelled
     } catch (failure: Exception) {
-        _error.value = failure.message ?: "No se pudo guardar la rutina"
+        _error.value = "No se pudo guardar la rutina. Revisa tu conexión e inténtalo de nuevo."
         false
     }
 }

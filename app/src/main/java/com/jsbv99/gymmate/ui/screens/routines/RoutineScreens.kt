@@ -132,7 +132,7 @@ fun RoutineEditorScreen(
         }
         if (attempted && !valid) Text("Escribe un nombre, selecciona ejercicios y revisa las series y repeticiones.", color = MaterialTheme.colorScheme.error)
         if (errorMessage != null) Text(errorMessage, color = MaterialTheme.colorScheme.error)
-        Text("Los cambios se guardan solo durante esta sesión simulada.")
+        Text("Los cambios se guardan en tu cuenta.")
         Button(onClick = {
             attempted = true
             if (valid) onSaveRoutine(Routine(id, name.trim(), selected.map { exerciseId ->

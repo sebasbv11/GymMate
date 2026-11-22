@@ -35,7 +35,7 @@ fun WorkoutScreen(
 
     WorkoutLayout("Entrenamiento activo", modifier) {
         Text(routine.name, style = MaterialTheme.typography.titleMedium)
-        Text("Datos simulados · ${exercises.size} ejercicios · $totalSets series")
+        Text("${exercises.size} ejercicios · $totalSets series")
         LinearProgressIndicator(progress = { completedSets / totalSets.toFloat() }, modifier = Modifier.fillMaxWidth())
         Text("$completedSets de $totalSets series completadas")
         Card(Modifier.fillMaxWidth()) {

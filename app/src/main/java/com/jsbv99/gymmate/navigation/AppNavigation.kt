@@ -50,7 +50,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.Splash,
+        startDestination = if (container.authRepository.currentUser.value != null) Routes.Home else Routes.Splash,
         modifier = modifier
     ) {
         composable(Routes.Splash) {
@@ -92,6 +92,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onProgress = { navController.navigate(Routes.Progress) },
                 onSettings = { navController.navigate(Routes.Settings) },
                 onSignOut = {
+                    workout.clear()
                     navController.navigate(Routes.Splash) {
                         popUpTo(Routes.Home) { inclusive = true }
                     }

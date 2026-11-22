@@ -34,7 +34,10 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (failure: Exception) {
-            error.value = failure.message ?: "No se pudo completar la operación"
+            error.value = when (failure) {
+                is IllegalArgumentException, is IllegalStateException -> failure.message
+                else -> "No se pudo completar la operación. Inténtalo de nuevo."
+            }
             false
         } finally {
             loading.value = false
