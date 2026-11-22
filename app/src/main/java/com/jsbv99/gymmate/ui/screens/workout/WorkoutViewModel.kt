@@ -26,20 +26,6 @@ class WorkoutViewModel(
     )
     val uiState = mutableState.asStateFlow()
 
-    init {
-        // Si Android restaura el resumen, el repositorio en memoria pudo haberse recreado.
-        // Se registra el mismo ID, sin emitir un nuevo evento de navegación.
-        mutableState.value.result?.takeIf { mutableState.value.phase == WorkoutPhase.SUMMARY }?.let { result ->
-            viewModelScope.launch {
-                try { workouts.save(result) }
-                catch (e: CancellationException) { throw e }
-                catch (_: Exception) {
-                    if (uiState.value.sessionId == result.id) update(uiState.value.copy(error = "No se pudo recuperar la sesión en memoria."))
-                }
-            }
-        }
-    }
-
     private fun update(state: WorkoutUiState) {
         mutableState.value = state
         savedState[KEY] = state

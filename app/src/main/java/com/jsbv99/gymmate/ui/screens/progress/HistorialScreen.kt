@@ -33,7 +33,7 @@ fun HistorialScreen(
                     TextButton(onClick = onBack) { Text("Volver") }
                     Text("Historial", style = MaterialTheme.typography.headlineMedium)
                     Text("Cada sesión cuenta. Consulta tus entrenamientos anteriores.")
-                    Text("Sesiones guardadas en esta sesión de la aplicación", style = MaterialTheme.typography.labelLarge)
+                    Text("Sesiones guardadas en tu cuenta", style = MaterialTheme.typography.labelLarge)
                     OutlinedButton(onClick = onProgress) { Text("Consultar progreso") }
                 }
             }

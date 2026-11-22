@@ -33,7 +33,7 @@ fun WorkoutSummaryScreen(
                 Text("Calorías simuladas: 150 kcal")
             }
         }
-        Text(if (sessionSaved) "Sesión guardada en el historial de esta ejecución. Los datos en memoria se pierden al cerrar el proceso."
+        Text(if (sessionSaved) "Sesión guardada en tu historial."
             else "Vista previa de una sesión de demostración.",
             color = MaterialTheme.colorScheme.onSurfaceVariant)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
