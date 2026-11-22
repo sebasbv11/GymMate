@@ -1,5 +1,11 @@
 package com.jsbv99.gymmate.ui.screens.routines
 
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,12 +32,27 @@ fun RoutineEditorRoute(model: RoutinesViewModel, exercisesModel: ExercisesViewMo
     val exercises by exercisesModel.exercises.collectAsStateWithLifecycle()
     val error by model.error.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    var saving by remember { mutableStateOf(false) }
+    var saved by remember { mutableStateOf(false) }
     // No convertir un ID de edición inexistente en una rutina nueva.
     val routine = routines.find { it.id == editId }
     if (editId != null && routine == null) {
         RoutineDetailScreen(null, onBack, {}, {})
     } else {
-        RoutineEditorScreen(onBack, { value -> scope.launch { if (model.save(value)) onSaved() } },
-            routine, exercises.map { Exercise(it.id, it.name, it.muscle) }, errorMessage = error)
+        RoutineEditorScreen(onBack, { value ->
+            if (!saving) {
+                saving = true
+                scope.launch {
+                    try { if (model.save(value)) saved = true }
+                    finally { saving = false }
+                }
+            }
+        }, routine, exercises.map { Exercise(it.id, it.name, it.muscle) }, errorMessage = error, saving = saving)
+        if (saved) AlertDialog(
+            onDismissRequest = { saved = false; onSaved() },
+            title = { Text("Rutina guardada") },
+            text = { Text("Tu rutina está disponible en tu cuenta.") },
+            confirmButton = { TextButton(onClick = { saved = false; onSaved() }) { Text("Entendido") } }
+        )
     }
 }

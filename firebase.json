@@ -1,4 +1,14 @@
 {
-  "firestore": { "rules": "firestore.rules" },
-  "auth": { "providers": { "emailPassword": true } }
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "GymMate",
+        "supportEmail": "jsbv99@gmail.com"
+      }
+    }
+  }
 }

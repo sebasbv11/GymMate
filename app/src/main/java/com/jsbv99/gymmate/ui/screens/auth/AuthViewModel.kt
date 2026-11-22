@@ -10,10 +10,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 data class AuthUiState(val user: AuthUser? = null, val loading: Boolean = false, val error: String? = null)
 
-class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
+    val currentUser = repository.currentUser
     private val loading = MutableStateFlow(false)
     private val error = MutableStateFlow<String?>(null)
     val uiState: StateFlow<AuthUiState> = combine(repository.currentUser, loading, error) { user, busy, message ->
@@ -22,6 +26,10 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     suspend fun login(email: String, password: String): Boolean = run { repository.login(email, password) }
     suspend fun register(name: String, email: String, password: String): Boolean = run { repository.register(name, email, password) }
+    suspend fun signInWithGoogle(idToken: String): Boolean = run { repository.signInWithGoogle(idToken) }
+    fun showGoogleError() { error.value = "No se pudo iniciar sesión con Google. Inténtalo de nuevo." }
+    suspend fun resetPassword(email: String): Boolean = run { repository.resetPassword(email) }
+    fun clearError() { error.value = null }
     suspend fun signOut(): Boolean = run { repository.signOut() }
 
     private suspend fun run(action: suspend () -> Unit): Boolean {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -80,7 +81,7 @@ fun WelcomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .widthIn(max = 460.dp)
-                .height(54.dp),
+                .heightIn(min = 54.dp),
             colors = ButtonDefaults.buttonColors(containerColor = GymGreen, contentColor = GymNavy)
         ) {
             Text("Iniciar sesión", fontWeight = FontWeight.Bold)
@@ -91,7 +92,7 @@ fun WelcomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .widthIn(max = 460.dp)
-                .height(54.dp),
+                .heightIn(min = 54.dp),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
         ) {
             Text("Crear una cuenta")
